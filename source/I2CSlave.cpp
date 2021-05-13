@@ -16,7 +16,7 @@
  */
 #include "drivers/I2CSlave.h"
 
-// #if DEVICE_I2CSLAVE
+// #if DEVICE_I2CSLAVE // This line originally  uncommented
 
 namespace mbed {
 
@@ -29,7 +29,7 @@ I2CSlave::I2CSlave(PinName sda, PinName scl) : _i2c()
 
 I2CSlave::I2CSlave(const i2c_pinmap_t &static_pinmap) : _i2c()
 {
-    i2c_init_direct(&_i2c, &static_pinmap);
+    i2c_init_direct(&_i2c, &static_pinmap); // This function is in the i2c.api.h, but has no implementation in i2c_api.c
     i2c_frequency(&_i2c, 100000);
     i2c_slave_mode(&_i2c, 1);
 }
@@ -39,6 +39,8 @@ void I2CSlave::frequency(int hz)
     i2c_frequency(&_i2c, hz);
 }
 
+// We can probably copy over this function as it has no master/slave specifics and 
+// it would be helpful for each I2CEve to have an adress 
 void I2CSlave::address(int address)
 {
     int addr = (address & 0xFF) | 1;
@@ -50,14 +52,17 @@ int I2CSlave::receive(void)
     return i2c_slave_receive(&_i2c);
 }
 
+// Returns an aknowledgement: 0 on success (ACK), non-0 on failure (NACK)
 int I2CSlave::read(char *data, int length)
 {
-    return i2c_slave_read(&_i2c, data, length) != length;
+    return i2c_slave_read(&_i2c, data, length) != length; 
 }
 
 int I2CSlave::read(void)
 {
-    return i2c_byte_read(&_i2c, 0);
+    return i2c_byte_read(&_i2c, 0); 
+    // Sends last = 0 to i2c_do_read 
+    // This in turn will call i2c_conset
 }
 
 int I2CSlave::write(const char *data, int length)
@@ -65,6 +70,9 @@ int I2CSlave::write(const char *data, int length)
     return i2c_slave_write(&_i2c, data, length) != length;
 }
 
+// This function almost identical between I2CSlave and I2C
+// Both return i2c_byte_write(&i2c, data)
+// Master has added nuance of locking and unlocking prior to writing
 int I2CSlave::write(int data)
 {
     return i2c_byte_write(&_i2c, data);

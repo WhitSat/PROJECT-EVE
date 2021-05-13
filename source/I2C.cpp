@@ -97,9 +97,12 @@ int I2C::write(int address, const char *data, int length, bool repeated)
     int written = i2c_write(&_i2c, address, data, length, stop);
 
     unlock();
-    return length != written;
+    return length != written; // Returns 0 on success (ack), nonzero on failure (nack)
 }
 
+// This function almost identical between I2CSlave and I2C
+// Both return i2c_byte_write(&i2c, data)
+// Master has added nuance of locking and unlocking prior to writing
 int I2C::write(int data)
 {
     lock();
@@ -121,17 +124,23 @@ int I2C::read(int address, char *data, int length, bool repeated)
     return length != read;
 }
 
+// Reads a single byte from the I2C bus
 int I2C::read(int ack)
 {
+    // ack	indicates if the byte is to be acknowledged (1 = acknowledge)
     lock();
     int ret;
-    if (ack) {
-        ret = i2c_byte_read(&_i2c, 0);
+    if (ack) { 
+        ret = i2c_byte_read(&_i2c, 0); 
+        // If the byte is to be acknowledged, send last = 0 to i2c_do_read
+        // This in turn will call i2c_conset
     } else {
         ret = i2c_byte_read(&_i2c, 1);
+        // If the byte is not to be acknowledged, send last = 1 to i2c_do_read
+        // This in turn will call i2c_conclr
     }
     unlock();
-    return ret;
+    return ret; // Return the byte read
 }
 
 void I2C::start(void)

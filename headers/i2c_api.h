@@ -159,7 +159,7 @@ void i2c_init_direct(i2c_t *obj, const i2c_pinmap_t *pinmap);
  *  @param sda  The sda pin
  *  @param scl  The scl pin
  */
-void i2c_init(i2c_t *obj, PinName sda, PinName scl);
+void i2c_init(i2c_t *obj, PinName sda, PinName scl); 
 
 /** Release a I2C object
  *
