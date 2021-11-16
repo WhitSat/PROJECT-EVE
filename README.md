@@ -16,3 +16,7 @@
 * Construction in slave mode
 * Ability to read from master
 * Individual addresses 
+
+# Ideas for monitoring the master:
+* General Call: master periodically calls all slaves, and eavesdroppers look for the message and acknowledge; if eavesdroppers don't receive message, execute succession.
+* Multi-master: eavesdropper masters check on "mission" master and communicate with each other to resolve succession.
